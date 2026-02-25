@@ -1,0 +1,213 @@
+{% if tool == 'ssl' %}
+<div class="glass-card p-4 border-primary">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0 font-weight-bold">🔐 SSL/TLS Certificate Report</h5>
+        <span class="badge {% if data.expired %}badge-danger{% else %}badge-success{% endif %}">
+            {% if data.expired %}EXPIRED{% else %}VALID{% endif %}
+        </span>
+    </div>
+    {% if data.error %}
+    <div class="alert alert-danger">{{ data.error }}</div>
+    {% else %}
+    <div class="row">
+        <div class="col-md-6 border-right">
+            <h6 class="text-tiny font-weight-bold text-uppercase text-muted">Subject Info</h6>
+            <p class="mb-1"><strong>Common Name:</strong> {{ data.subject or 'Unknown' }}</p>
+            <p class="mb-3 text-tiny text-muted">Serial: {{ data.serial_number }}</p>
+
+            <h6 class="text-tiny font-weight-bold text-uppercase text-muted">Issuer Info</h6>
+            <p class="m-0"><strong>CA:</strong> {{ data.issuer or 'Unknown' }}</p>
+        </div>
+        <div class="col-md-6 pl-4">
+            <h6 class="text-tiny font-weight-bold text-uppercase text-muted">Validity Period</h6>
+            <p class="mb-1 text-tiny">Issued: {{ data.not_before[:10] }}</p>
+            <p class="mb-1 text-tiny">Expires: {{ data.not_after[:10] }}</p>
+            <div class="progress progress-sm mt-3" style="height: 4px;">
+                {% set total = 365 %} {# Approximate for bar #}
+                {% set raw_percent = (data.days_left / total * 100) %}
+                {% if raw_percent > 100 %}{% set percent = 100 %}{% elif raw_percent < 0 %}{% set percent=0 %}{% else
+                    %}{% set percent=raw_percent %}{% endif %} <div
+                    class="progress-bar {% if data.days_left < 30 %}bg-warning{% else %}bg-success{% endif %}"
+                    style="--progress-width: {{ percent|int }}%; width: var(--progress-width);">
+            </div>
+        </div>
+        <p class="text-tiny mt-1 {% if data.days_left < 30 %}text-warning{% endif %}">
+            {{ data.days_left }} days remaining
+        </p>
+    </div>
+</div>
+<div class="mt-3 pt-3 border-top text-tiny text-muted">
+    <strong>Negotiated Cipher:</strong> {{ data.cipher[0] }} ({{ data.cipher[1] }} {{ data.cipher[2] }} bits)
+</div>
+{% endif %}
+</div>
+
+{% elif tool == 'headers' %}
+<div class="glass-card p-4 border-info">
+    <h5 class="font-weight-bold mb-4">🛡️ Security Header Audit</h5>
+    {% if data.error %}
+    <div class="alert alert-danger">{{ data.error }}</div>
+    {% else %}
+    <div class="table-responsive">
+        <table class="table table-dark-glass table-sm text-tiny">
+            <thead>
+                <tr>
+                    <th>Header</th>
+                    <th>Status</th>
+                    <th>Value</th>
+                    <th>Insight</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name, info in data.headers.items() %}
+                <tr>
+                    <td class="font-weight-bold">{{ name }}</td>
+                    <td>
+                        {% if info.present %}
+                        <span class="text-success">✅ Present</span>
+                        {% else %}
+                        <span class="text-danger">❌ Missing</span>
+                        {% endif %}
+                    </td>
+                    <td><code class="text-primary">{{ info.value or '-' }}</code></td>
+                    <td class="text-muted">{{ info.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-3 p-3 bg-glass-dark rounded">
+        <p class="m-0 text-tiny"><strong>Server Identified:</strong> {{ data.server or 'Unknown' }}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% elif tool == 'subdomains' %}
+<div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0 font-weight-bold">🌐 Subdomain Intelligence (crt.sh)</h5>
+        <span class="badge badge-glass">{{ data|length }} Found</span>
+    </div>
+    {% if not data %}
+    <p class="text-muted small">No subdomains found in certificate transparency logs.</p>
+    {% else %}
+    <div class="list-group list-group-flush bg-transparent">
+        {% for sub in data %}
+        <div class="list-group-item bg-transparent border-light-glass d-flex justify-content-between py-2">
+            <code class="text-info">{{ sub }}</code>
+            <a href="https://{{ sub }}" target="_blank" class="text-tiny text-muted">Open 🔗</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% elif tool == 'dirs' %}
+<div class="glass-card p-4 border-warning">
+    <h5 class="font-weight-bold mb-3">📂 Directory & Sensitive Path Exposure</h5>
+    {% if not data %}
+    <p class="text-success small">✅ No common sensitive paths detected (200 OK).</p>
+    {% else %}
+    <div class="list-group">
+        {% for entry in data %}
+        <div class="list-group-item bg-dark-glass border-warning mb-2 rounded p-3">
+            <div class="d-flex justify-content-between">
+                <strong class="text-warning">/{{ entry.path }}</strong>
+                <span class="badge badge-glass">HTTP {{ entry.status }}</span>
+            </div>
+            <p class="m-0 mt-2 text-tiny text-muted">{{ entry.url }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="alert alert-warning text-tiny mt-3">
+        <strong>High Priority:</strong> Exposed directories like <code>.git</code> or <code>.env</code> can lead to
+        complete server compromise.
+    </div>
+    {% endif %}
+</div>
+
+{% elif tool == 'tech' %}
+<div class="glass-card p-4">
+    <h5 class="font-weight-bold mb-4">🛠️ Technology Stack Detection</h5>
+    {% if data.error %}
+    <div class="alert alert-danger">{{ data.error }}</div>
+    {% elif not data.stack %}
+    <p class="text-muted">Could not identify tech signatures from headers or HTML hooks.</p>
+    {% else %}
+    <div class="row">
+        {% for item in data.stack %}
+        <div class="col-md-6 mb-3">
+            <div class="p-3 bg-glass-dark rounded border-left border-primary">
+                <h6 class="text-tiny font-weight-bold text-uppercase opacity-50">{{ item.type }}</h6>
+                <p class="m-0 font-weight-bold text-info">{{ item.name }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% elif tool == 'email' %}
+<div class="glass-card p-4">
+    <h5 class="font-weight-bold mb-4">📧 Email Security Policy (DNS)</h5>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="p-3 bg-glass-dark rounded h-100">
+                <h6 class="font-weight-bold">SPF Record</h6>
+                {% if data.spf %}
+                <code class="text-success d-block mb-2">{{ data.spf }}</code>
+                <p class="text-tiny text-muted m-0">Prevents unauthorized IP addresses from sending emails as your
+                    domain.</p>
+                {% else %}
+                <span class="text-danger d-block">❌ NO SPF FOUND</span>
+                <p class="text-tiny text-muted m-0">High risk of domain spoofing.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="p-3 bg-glass-dark rounded h-100">
+                <h6 class="font-weight-bold">DMARC Record</h6>
+                {% if data.dmarc %}
+                <code class="text-info d-block mb-2">{{ data.dmarc }}</code>
+                <p class="text-tiny text-muted m-0">Tells receiving servers how to handle emails that fail SPF/DKIM.</p>
+                {% else %}
+                <span class="text-warning d-block">⚠️ NO DMARC FOUND</span>
+                <p class="text-tiny text-muted m-0">Missing reporting and enforcement policy.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .bg-glass-dark {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .border-light-glass {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table-dark-glass {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .table-dark-glass th {
+        border-top: none;
+        color: white;
+        opacity: 0.5;
+    }
+
+    .border-primary {
+        border-left: 4px solid #6366f1 !important;
+    }
+
+    .border-info {
+        border-left: 4px solid #0ea5e9 !important;
+    }
+
+    .border-warning {
+        border-left: 4px solid #f59e0b !important;
+    }
+</style>
