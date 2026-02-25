@@ -1,0 +1,494 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <section class="scanner-section p-4">
+        <div class="scanner-header mb-4">
+            <h1 class="display-4 font-weight-bold gradient-text">Command Center</h1>
+            <p class="lead text-muted">Advanced security reconnaissance and analysis suite.</p>
+        </div>
+
+        <!-- Dashboard Navigation -->
+        <ul class="nav nav-pills dashboard-nav mb-5" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="network-tab" data-toggle="pill" href="#network-pane" role="tab">
+                    <span class="nav-icon">🛡️</span> Network Intelligence
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="security-tab" data-toggle="pill" href="#security-pane" role="tab">
+                    <span class="nav-icon">💎</span> Pro Security Suite
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Network Intelligence Pane -->
+            <div class="tab-pane fade show active" id="network-pane" role="tabpanel">
+                <form class="scanner-form mt-4" hx-post="/nmap/scan" hx-target="#scan-results"
+                    hx-indicator="#scan-indicator">
+
+                    <div class="form-row align-items-end">
+                        <div class="col-md-7">
+                            <label class="form-label text-tiny font-weight-bold text-uppercase tracking-wider">Target IP
+                                or
+                                Hostname</label>
+                            <div class="input-glass-group">
+                                <span class="input-icon">📡</span>
+                                <input type="text" name="target" class="form-control-glass"
+                                    placeholder="e.g. 192.168.1.1 or scanme.nmap.org" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-tiny font-weight-bold text-uppercase tracking-wider">Scan
+                                Level</label>
+                            <select name="scan_level" class="form-control-glass">
+                                <option value="quick">⚡ Quick Scan (Fastest)</option>
+                                <option value="intense" selected>🔥 Intense (Service/Script)</option>
+                                <option value="stealth">⚖️ Balanced (Slower/Quiet)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary-gradient btn-block">
+                                <span class="btn-text">Execute</span>
+                                <span class="btn-icon ml-2">🚀</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="scan-indicator" class="htmx-indicator mt-4 animate-pulse">
+                        <div class="spinner-premium"></div>
+                        <div class="indicator-text ml-3">
+                            <span class="d-block font-weight-bold">Intelligence Gathering in Progress</span>
+                            <span class="text-tiny text-muted">Analyzing services and version strings...</span>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="scan-results" class="results-container mt-5">
+                    <div class="placeholder-content p-5 text-center border-dashed rounded-lg">
+                        <div class="placeholder-icon mb-3 opacity-20">📊</div>
+                        <h4 class="text-muted opacity-50">Intelligence Feed Empty</h4>
+                        <p class="text-muted opacity-40">Initiate a scan to populate real-time asset data.</p>
+                    </div>
+                </div>
+
+                <div class="technical-insights mt-5 animate-fade-in" style="animation-delay: 0.3s;">
+                    <div class="glass-card p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="mr-2">💡</span>
+                            <h5 class="m-0 font-weight-bold">Technical Insight: Terminal Messages</h5>
+                        </div>
+                        <p class="text-muted small">
+                            During a scan, Nmap tests various protocols to identify services. This traditionally creates
+                            <code>405 Method Not Allowed</code> noise in the terminal.
+                            <strong>Automated Management:</strong> I've implemented a custom filter that now
+                            automatically
+                            silences these probes in your terminal for a cleaner intelligence feed.
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge badge-glass text-tiny">Proactive Monitoring Active</span>
+                            <a href="https://nmap.org/book/man-version-detection.html" target="_blank"
+                                class="text-tiny text-primary">Learn more about Service Discovery →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Security Suite Pane -->
+            <div class="tab-pane fade" id="security-pane" role="tabpanel">
+                <div class="row mt-4">
+                    <!-- Tool Cards -->
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">🔒</div>
+                            <h5 class="font-weight-bold">SSL Analysis</h5>
+                            <p class="text-muted small">Deep dive into certificate chain, expiry, and cipher strength.
+                            </p>
+                            <form hx-post="/security/1/ssl" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="url" class="form-control-glass mb-3"
+                                    placeholder="e.g. https://google.com" required>
+                                <button type="submit" class="btn btn-sm btn-primary-gradient btn-block">Analyze
+                                    Certificate</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">🛡️</div>
+                            <h5 class="font-weight-bold">Security Headers</h5>
+                            <p class="text-muted small">Verify HSTS, CSP, X-Frame-Options and more.</p>
+                            <form hx-post="/security/1/headers" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="url" class="form-control-glass mb-3"
+                                    placeholder="e.g. https://google.com" required>
+                                <button type="submit" class="btn btn-sm btn-primary-gradient btn-block">Audit
+                                    Headers</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">🌐</div>
+                            <h5 class="font-weight-bold">Subdomain Recon</h5>
+                            <p class="text-muted small">Enumerate public subdomains via Transparency Logs.</p>
+                            <form hx-post="/security/1/subdomains" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="domain" class="form-control-glass mb-3"
+                                    placeholder="e.g. example.com" required>
+                                <button type="submit"
+                                    class="btn btn-sm btn-primary-gradient btn-block">Enumerate</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">📂</div>
+                            <h5 class="font-weight-bold">Directory Scan</h5>
+                            <p class="text-muted small">Scan for common sensitive paths and directories.</p>
+                            <form hx-post="/security/1/dirs" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="url" class="form-control-glass mb-3"
+                                    placeholder="e.g. https://example.com" required>
+                                <button type="submit" class="btn btn-sm btn-primary-gradient btn-block">Start
+                                    Discovery</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">🛠️</div>
+                            <h5 class="font-weight-bold">Tech Detection</h5>
+                            <p class="text-muted small">Fingerprint the underlying technology & stack.</p>
+                            <form hx-post="/security/1/tech" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="url" class="form-control-glass mb-3"
+                                    placeholder="e.g. https://example.com" required>
+                                <button type="submit" class="btn btn-sm btn-primary-gradient btn-block">Detect
+                                    Stack</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="glass-card p-4 h-100 tool-card">
+                            <div class="tool-icon mb-3">📧</div>
+                            <h5 class="font-weight-bold">Email Security</h5>
+                            <p class="text-muted small">Validate SPF, DMARC, and DKIM DNS records.</p>
+                            <form hx-post="/security/1/email" hx-target="#security-results"
+                                hx-indicator="#security-indicator">
+                                <input type="text" name="domain" class="form-control-glass mb-3"
+                                    placeholder="e.g. example.com" required>
+                                <button type="submit" class="btn btn-sm btn-primary-gradient btn-block">Check
+                                    Policy</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared Indicator for Pro Suite -->
+                <div id="security-indicator" class="htmx-indicator mt-4 animate-pulse">
+                    <div class="spinner-premium"></div>
+                    <div class="indicator-text ml-3">
+                        <span class="d-block font-weight-bold">Deep Analysis in Progress</span>
+                        <span class="text-tiny text-muted">Evaluating target security posture...</span>
+                    </div>
+                </div>
+
+                <!-- Results Area for Pro Suite -->
+                <div id="security-results" class="results-container mt-5">
+                    <div class="placeholder-content p-5 text-center border-dashed rounded-lg">
+                        <div class="placeholder-icon mb-3 opacity-20">💎</div>
+                        <h4 class="text-muted opacity-50">Pro Analysis Results</h4>
+                        <p class="text-muted opacity-40">Select a tool above to begin deep inspection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        backdrop-filter: blur(5px);
+    }
+
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .gradient-text {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .input-glass-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 5px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .input-glass-group:focus-within {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .form-control-glass {
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 10px;
+        width: 100%;
+        outline: none;
+    }
+
+    .btn-primary-gradient {
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        height: 52px;
+    }
+
+    .btn-primary-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5);
+    }
+
+    /* Dashboard Navigation */
+    .dashboard-nav {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: inline-flex;
+    }
+
+    .dashboard-nav .nav-link {
+        color: rgba(255, 255, 255, 0.5);
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .dashboard-nav .nav-link.active {
+        background: var(--primary-gradient) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .dashboard-nav .nav-link:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .nav-icon {
+        margin-right: 8px;
+    }
+
+    /* Tool Cards */
+    .tool-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .tool-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .tool-icon {
+        font-size: 2rem;
+        background: rgba(99, 102, 241, 0.1);
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+
+    .spinner-premium {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid #6366f1;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .border-dashed {
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.1em;
+    }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .7;
+        }
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Existing styles override for the indicator */
+    .htmx-indicator {
+        display: none;
+        align-items: center;
+    }
+
+    .htmx-request#scan-indicator,
+    .htmx-request.htmx-indicator {
+        display: flex !important;
+    }
+
+    .scanner-section {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .scanner-header h3 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, var(--accent-color), var(--info-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .input-group input {
+        flex: 1;
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .input-group .btn {
+        padding: 0 2rem;
+        font-size: 1.1rem;
+    }
+
+    .asset-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .asset-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+    }
+
+    /* HTMX Indicator */
+    .htmx-indicator {
+        display: none;
+        align-items: center;
+        gap: 1rem;
+        color: var(--accent-color);
+        font-weight: 500;
+    }
+
+    .htmx-request#scan-indicator {
+        display: flex;
+    }
+
+    .htmx-indicator.htmx-request {
+        display: flex;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--border-color);
+        border-top: 3px solid var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .placeholder-content {
+        text-align: center;
+        padding: 3rem;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+    }
+
+    .badge-success {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .badge-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+</style>
+{% endblock %}

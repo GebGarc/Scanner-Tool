@@ -1,0 +1,18 @@
+{
+    "include": [
+        "app"
+    ],
+    "venvPath": ".",
+    "venv": ".venv",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "extraPaths": [
+                "."
+            ]
+        }
+    ],
+    "typeCheckingMode": "basic",
+    "reportMissingImports": "none",
+    "reportMissingTypeStubs": "none"
+}

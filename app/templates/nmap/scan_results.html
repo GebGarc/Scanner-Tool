@@ -1,0 +1,188 @@
+<div class="scan-results-container animate-fade-in">
+    <div class="results-header mb-3">
+        <h2>🔍 Scan Intelligence</h2>
+        <p class="text-muted">Targets analyzed: <strong>{{ target }}</strong></p>
+    </div>
+
+    {% if assets %}
+    <div class="asset-grid">
+        {% for asset in assets %}
+        <div class="asset-dashboard-card card-premium mb-3">
+            <div class="asset-info-section p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="asset-title">
+                        <span class="icon-circle mr-2">🖥️</span>
+                        <h3 class="d-inline-block m-0">{{ asset.ip_address }}</h3>
+                        {% if asset.hostname %}
+                        <span class="hostname-pill ml-2">{{ asset.hostname }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="asset-meta text-right">
+                        <span class="badge badge-glass">{{ asset.source_tool }}</span>
+                        <div class="text-tiny text-muted mt-1">Found via live scan</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="service-table-wrapper">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>PORT</th>
+                            <th>SERVICE</th>
+                            <th>VERSION</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in asset.services %}
+                        <tr class="service-row">
+                            <td class="font-mono">
+                                <span class="protocol-tag">{{ service.protocol | upper }}</span>
+                                <span class="port-num">{{ service.port }}</span>
+                            </td>
+                            <td>
+                                <div class="service-desc">
+                                    <span class="service-icon">
+                                        {% if service.port == 80 or service.port == 443 %}🌐{% elif service.port == 22
+                                        %}🔑{% elif service.port == 3306 or service.port == 5432 %}🗄️{% elif
+                                        service.port == 445 or service.port == 139 %}📁{% else %}⚙️{% endif %}
+                                    </span>
+                                    <span class="service-name">{{ service.service_name }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="version-text text-muted">
+                                    {{ service.service_product }} {{ service.service_version }}
+                                    {% if service.service_extrainfo %}
+                                    <span class="text-tiny d-block">({{ service.service_extrainfo }})</span>
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span
+                                    class="status-indicator {% if service.state == 'open' %}status-open{% else %}status-closed{% endif %}">
+                                    {{ service.state | upper }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-results-state p-5 text-center">
+        <div class="empty-icon mb-3">📡</div>
+        <h3>No services identified</h3>
+        <p class="text-muted">We couldn't find any open ports on <strong>{{ target }}</strong>. The host might be down
+            or heavily firewalled.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card-premium {
+        background: var(--card-bg, rgba(255, 255, 255, 0.05));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: transform 0.3s ease;
+    }
+
+    .hostname-pill {
+        background: rgba(var(--primary-rgb, 0, 123, 255), 0.1);
+        color: var(--primary-color, #007bff);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(var(--primary-rgb), 0.2);
+    }
+
+    .premium-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .premium-table th {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 12px 20px;
+        text-align: left;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .service-row {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        transition: background 0.2s ease;
+    }
+
+    .service-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .service-row td {
+        padding: 14px 20px;
+        vertical-align: middle;
+    }
+
+    .protocol-tag {
+        font-size: 0.6rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-right: 5px;
+        color: var(--text-muted);
+    }
+
+    .port-num {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .status-indicator {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .status-open {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+
+    .status-closed {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .text-tiny {
+        font-size: 0.75rem;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
