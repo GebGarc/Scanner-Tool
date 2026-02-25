@@ -192,21 +192,29 @@ class SecurityAnalysisService:
         
         results: Dict[str, Optional[str]] = {"spf": None, "dmarc": None}
         
-        # Using Cloudflare DNS-over-HTTPS for DNS lookups
-        doh_url = "https://cloudflare-dns.com/query"
+        # DNS-over-HTTPS providers
+        providers = [
+            "https://cloudflare-dns.com/query",
+            "https://dns.google/resolve"
+        ]
         
         async def query_dns(name: str, type: str) -> Optional[str]:
             params = {"name": name, "type": type}
             headers = {"Accept": "application/dns-json"}
+            
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                resp = await client.get(doh_url, params=params, headers=headers)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if "Answer" in data:
-                        # Return the first TXT record content
-                        for answer in data["Answer"]:
-                            if answer["type"] == 16: # TXT
-                                return answer["data"].strip('"')
+                for url in providers:
+                    try:
+                        resp = await client.get(url, params=params, headers=headers)
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            if "Answer" in data:
+                                # Return the first TXT record content
+                                for answer in data["Answer"]:
+                                    if answer["type"] == 16: # TXT
+                                        return answer["data"].strip('"')
+                    except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError):
+                        continue # Try next provider
             return None
 
         results["spf"] = await query_dns(domain, "TXT")
